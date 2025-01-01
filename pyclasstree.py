@@ -1,6 +1,7 @@
 import sys
 from inspect import isfunction, isclass
 from tkinter import *
+from tkinter.colorchooser import askcolor
 from math import asin, pi, log, ceil
 
 
@@ -124,6 +125,28 @@ def horizontal_graphic_dots(dots, dots_amount=1000):
     return new_dots_list
 
 
+class CallableNodeSettings(Toplevel):
+    def __init__(self, node):
+        Toplevel.__init__(self)
+        self.node = node
+
+        self.row1 = Frame(self)
+        self.row1.pack(side=TOP, padx=20, pady=10)
+
+        self.label = Label(self.row1, text='Set node lines color:')
+        self.label.grid(row=0, column=0, sticky=EW)
+
+        self.button = Button(self.row1, text='color', command=self.set_color)
+        self.button.grid(row=0, column=1, sticky=EW)
+
+    def set_color(self):
+        rgb, hex_color = askcolor()
+        if hex_color:
+            self.node.lines_color = hex_color
+            for line_tag in self.node.lines.keys():
+                self.node.canvas.itemconfigure(line_tag, fill=hex_color, width=2)
+
+
 class Node:
     """The node instance stores all its sockets and all associated lines."""
     node_num = 0
@@ -152,6 +175,7 @@ class Node:
             self.color = '#483D8B'
         else:
             self.color = '#BDB76B'
+        self.lines_color = 'black'
 
         self.tag = tag
         self.top_socket_tag = None
@@ -169,6 +193,7 @@ class Node:
         self.canvas.tag_bind(self.tag, "<ButtonPress-1>", self.select_node)
         self.canvas.tag_bind(self.tag, "<B1-Motion>", self.move_node)
         self.canvas.tag_bind(self.tag, "<ButtonRelease-1>", self.unselect_node)
+        self.canvas.tag_bind(self.tag, "<Double-1>", self.set_lines_color)
 
         self.canvas.create_text(self.x + 100, self.y + 25, text=self.tag,
                                 anchor=CENTER, tags=(self.tag, 'text'))
@@ -219,7 +244,7 @@ class Node:
         self.update_sockets()
         self.update_lines()
         for line_tag in self.lines.keys():
-            self.canvas.itemconfigure(line_tag, fill='black', width=2)
+            self.canvas.itemconfigure(line_tag, fill=self.lines_color, width=2)
 
     def move_node(self, event):
         dx = event.widget.canvasx(event.x) - self.offset_x
@@ -273,6 +298,9 @@ class Node:
     def update_lines(self):
         for line in self.lines.values():
             line.update()
+
+    def set_lines_color(self, event):
+        CallableNodeSettings(self)
 
 
 class Line:
