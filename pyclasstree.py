@@ -321,17 +321,20 @@ class MainWindow(Frame):
         self.rows = 0
         self.columns = 0
         self.line_dots_amount = 500
-        self.canvas_w = self.root.winfo_screenwidth()  # 2000
-        self.canvas_h = self.root.winfo_screenheight()  # 1500
+        self.canvas_w = self.root.winfo_screenwidth()
+        self.canvas_h = self.root.winfo_screenheight()
         self.zoom = 0
-        self.xscroll = None
-        self.yscroll = None
+        self.xscroll = self.canvas_w
+        self.yscroll = self.canvas_h
         self.count_parameters()
 
         # create a canvas with scroll bars
         ################################################################################
         self.canvas = CustomCanvas(self, bg='#595959', width=700, height=500)
-        self.canvas.config(scrollregion=(0, 0, self.canvas_w, self.canvas_h))
+        self.canvas.config(scrollregion=(-self.canvas_w * 0.5,
+                                         -self.canvas_h * 0.5,
+                                         self.canvas_w * 1.5,
+                                         self.canvas_h * 1.5))
         self.canvas.config(highlightthickness=0)
 
         self.scroll_x = Scrollbar(self, orient=HORIZONTAL, command=self.canvas.xview)
@@ -406,10 +409,6 @@ class MainWindow(Frame):
             self.zoom += 1
             self.xscroll *= (11 / 10)
             self.yscroll *= (11 / 10)
-            self.canvas.config(scrollregion=(-abs(self.xscroll - self.canvas_w) / 2,
-                                             -abs(self.yscroll - self.canvas_h) / 2,
-                                             (self.xscroll + self.canvas_w) / 2,
-                                             (self.yscroll + self.canvas_h) / 2))
             self.canvas.scale("all", x, y, (11 / 10), (11 / 10))
         elif event.num == 5 or event.delta < 0:
             if self.zoom - 1 <= -40:
@@ -417,11 +416,11 @@ class MainWindow(Frame):
             self.zoom -= 1
             self.xscroll *= (10 / 11)
             self.yscroll *= (10 / 11)
-            self.canvas.config(scrollregion=(-abs(self.xscroll - self.canvas_w) / 2,
-                                             -abs(self.yscroll - self.canvas_h) / 2,
-                                             (self.xscroll + self.canvas_w) / 2,
-                                             (self.yscroll + self.canvas_h) / 2))
             self.canvas.scale("all", x, y, (10 / 11), (10 / 11))
+        self.canvas.config(scrollregion=(-self.xscroll * 0.5,
+                                         -self.yscroll * 0.5,
+                                         self.xscroll * 1.5,
+                                         self.yscroll * 1.5))
         if self.zoom < -23:
             self.canvas.itemconfig('text', state=HIDDEN)
         else:
@@ -541,4 +540,4 @@ def drawtree(obj):
 
 
 if __name__ == '__main__':
-    drawtree(0)
+    drawtree(Frame)
