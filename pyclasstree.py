@@ -182,8 +182,8 @@ class Node:
         self.bottom_socket_tag = None
         self.x = x
         self.y = y
-        self.offset_x = None
-        self.offset_y = None
+        self.offset_x = 0
+        self.offset_y = 0
 
         self.sockets = {}    # {socket_tag: (x, y)}
         self.lines = {}    # {line_tag: line_instance}
